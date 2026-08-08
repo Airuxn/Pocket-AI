@@ -2,11 +2,13 @@
 
 **Airux Pocket AI** on Android — on-device LLM chat for **arm64** phones. Private AI that runs locally via llama.cpp; optional web search uses DuckDuckGo when a model supports native tool calling.
 
-**Package:** `com.localllm.chat` · **Latest:** [v1.0.0](https://github.com/Airuxn/Pocket-AI/releases/latest)
+**Package:** `com.localllm.chat` · **Latest:** [v1.0.1](https://github.com/Airuxn/Pocket-AI/releases/latest) · **Project age:** ~1 month (first code July 2026, public release August 2026)
 
 [![CI](https://github.com/Airuxn/Pocket-AI/actions/workflows/ci.yml/badge.svg)](https://github.com/Airuxn/Pocket-AI/actions/workflows/ci.yml)
+[![codecov](https://img.shields.io/codecov/c/github/Airuxn/Pocket-AI)](https://codecov.io/gh/Airuxn/Pocket-AI)
+[![License](https://img.shields.io/github/license/Airuxn/Pocket-AI)](LICENSE)
 
-**Quality:** CI (unit tests, lint, debug build) · CodeQL · Dependabot · manual [Release workflow](.github/workflows/release.yml) for APK · Vercel `ignoreCommand` waits for CI + CodeQL if hosted on Vercel
+**Quality:** CI (unit tests + JaCoCo coverage, lint, debug build) · CodeQL · Dependabot · manual [Release workflow](.github/workflows/release.yml) for APK · Vercel `ignoreCommand` waits for CI + CodeQL if hosted on Vercel
 
 ---
 
@@ -57,23 +59,30 @@ Open the APK on your device, allow install from unknown sources if prompted, the
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│  Compose UI (Chat, Models, Settings, Memory)            │
-├─────────────────────────────────────────────────────────┤
-│  ChatEngine → LlmRuntime → llama-bro-sdk → libllama_bro │
-├─────────────────────────────────────────────────────────┤
-│  PromptProfile · ModelCapabilities                    │
-│  NativeToolExecutor · WebSearchClient (network)         │
-└─────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│  Compose UI (Chat, Models, Settings, Memory)                    │
+├─────────────────────────────────────────────────────────────────┤
+│  ViewModel → ChatEngine → message augmentation + memory         │
+├─────────────────────────────────────────────────────────────────┤
+│  LlmRuntime → loads GGUF/mmproj, picks ModelProfile, wires tools  │
+├─────────────────────────────────────────────────────────────────┤
+│  llama-bro-sdk (JNI) → LlamaChatSession, streaming lexer, tool  │
+│  loop, and vision (mtmd) pixels                                   │
+├─────────────────────────────────────────────────────────────────┤
+│  PromptProfile · ModelCapabilities · NativeToolExecutor ·       │
+│  WebSearchClient · Room · DataStore                               │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
-| Layer | Location |
-|-------|----------|
-| App (Kotlin + Compose) | `app/src/main/java/` |
-| llama.cpp JNI SDK | `llama-bro-sdk/` |
-| Model + tool capabilities | `app/src/main/assets/capabilities.json` |
-| Downloadable model catalog | `models.json` |
-| Prompt benchmarks | `scripts/prompt-benchmark/` |
+| Layer | Location | Why it matters |
+|-------|----------|----------------|
+| App (Kotlin + Compose) | `app/src/main/java/` | UI, state management, persistence, downloads |
+| llama.cpp JNI SDK | `llama-bro-sdk/` | NDK bridge to quantized inference and vision |
+| Model + tool capabilities | `app/src/main/assets/capabilities.json` | Runtime feature flags per model, synced to benchmarks |
+| Downloadable model catalog | `models.json` | Hugging Face source URLs and RAM tiering |
+| Prompt benchmarks | `scripts/prompt-benchmark/` | Pre-release XML tool-call scoring |
+
+The Kotlin layer owns everything the user can touch: chat orchestration, model downloads, settings, memory, and crash diagnostics. The SDK layer owns the hard parts: native session lifecycle, streaming token lexing, XML tool-call parsing, and the ReAct-style loop. The boundary is intentionally thin so that most new features are Kotlin-only.
 
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the full chat pipeline, prompt tuning, and native stack.
 
@@ -98,6 +107,7 @@ Tools are enabled automatically from `capabilities.json` via `XmlToolFormats` + 
 ```bash
 ./gradlew :app:assembleDebug
 ./gradlew test
+./gradlew connectedAndroidTest          # needs an emulator/device; see docs/TESTING.md
 python3 scripts/prompt-benchmark/run_all.py --skip-download   # needs local GGUF weights
 ```
 
@@ -113,6 +123,34 @@ bash scripts/release.sh           # local: build + GitHub Release
 
 Requirements: JDK 17+, Android SDK platform **36**, build-tools **35.0.0**.
 
+**Coverage strategy:** Unit tests (Robolectric + JVM) cover the core Kotlin logic. The reported ~85% badge intentionally excludes Compose UI, `MainActivity`, the JNI bridge, and the on-device benchmark — those need emulator or hardware tests. See [docs/TESTING.md](docs/TESTING.md) for the full layered approach.
+
+---
+
+## What makes this different
+
+Most on-device Android LLM demos are thin wrappers around a single hardcoded model. Pocket AI treats the phone as a real platform:
+
+- **Model catalog with runtime capability detection** — the app does not assume every GGUF behaves the same; it loads per-model prompts, tool eligibility, and RAM tiers from JSON and switches behavior at runtime.
+- **Native tool calling without a backend** — search only fires when the model itself emits XML, and only for models that passed the offline benchmark. No API keys, no cloud orchestrator, no accounts.
+- **Vision through real llama.cpp mtmd** — not a cloud vision API; photos are encoded as native llama.cpp image tokens on the same session as the text.
+- **Privacy by design** — chat history and weights live in app-private storage; the only network call is DuckDuckGo when a tool-capable model triggers it.
+
+---
+
+## Demo
+
+Download the [latest APK](https://github.com/Airuxn/Pocket-AI/releases/latest), pick a model, and start a chat. Screenshots and a short screen recording are attached to the release notes.
+
+---
+
+## Lessons learned
+
+1. **Small quantized models are unreliable at JSON tool calls.** We moved to a strict XML template baked into the system prompt, with a streaming lexer that only emits a tool call after the closing tag arrives. This dramatically reduced false positives and premature network calls.
+2. **Robolectric tests catch real bugs if you instrument them honestly.** The reported ~85% coverage surfaced two production bugs: `CrashReporter` truncated reports to zero bytes because `fsync` reopened the file, and Dolphin models were misidentified as Phi because the substring check was ordered wrong. Both fixes are in the same commit that added the tests.
+3. **Coverage badges must be honest.** Hiding UI and JNI code from the badge is not cheating; it is documenting which quality gates live where. The missing layers are emulator tests, hardware smoke tests, and prompt benchmarks — and we say so explicitly.
+4. **A one-person project can still have production discipline.** Signed commits, branch protection on the other public repos, CI, CodeQL, Dependabot, and release workflows all fit in a small repo without becoming bureaucracy.
+
 ---
 
 ## Repository layout
@@ -123,8 +161,9 @@ Requirements: JDK 17+, Android SDK platform **36**, build-tools **35.0.0**.
 | `llama-bro-sdk/` | On-device llama.cpp JNI wrapper |
 | `models.json` | Downloadable model catalog |
 | `scripts/prompt-benchmark/` | Offline prompt + tool + inject benchmarks |
-| `docs/` | Architecture and maintainer notes |
-| `ARCHITECTURE.md` | Module layout and CI/release flow |
+| `docs/` | Architecture, testing strategy, and maintainer notes |
+| `docs/ARCHITECTURE.md` | Module layout and CI/release flow |
+| `docs/TESTING.md` | Unit, instrumented, and manual test layers |
 | `CHANGELOG.md` | Release history |
 
 ---

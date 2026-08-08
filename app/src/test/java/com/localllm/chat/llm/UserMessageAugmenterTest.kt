@@ -55,4 +55,51 @@ class UserMessageAugmenterTest {
         assertTrue(UserMessageAugmenter.isLiveInfoRequest("What's the Bitcoin price in USD today?"))
         assertTrue(UserMessageAugmenter.isLiveInfoRequest("What's the weather in Amsterdam right now?"))
     }
+
+    @Test
+    fun howToRequestForUncensoredAddsStepHint() {
+        assertTrue(UserMessageAugmenter.isHowToRequest("How do I bake bread?"))
+        val out = UserMessageAugmenter.augment(
+            catalogId = "dolphin3-qwen2.5-1.5b-uncensored",
+            isUncensored = true,
+            message = "How do I bake bread?",
+        )
+        assertTrue(out.contains("numbered steps"))
+        assertTrue(out.contains("materials"))
+    }
+
+    @Test
+    fun visionPhotoQuestionWithoutAttachmentAddsWarning() {
+        val out = UserMessageAugmenter.augment(
+            catalogId = "smolvlm2-500m-video-vision",
+            isUncensored = false,
+            message = "What is in this photo?",
+            hasPhotoAttachment = false,
+        )
+        assertTrue(out.contains("No image is attached"))
+    }
+
+    @Test
+    fun identityQuestionOnLlamaGetsPocketAiHint() {
+        val out = UserMessageAugmenter.augment(
+            catalogId = "llama3.2-1b-q4",
+            isUncensored = false,
+            message = "What model are you?",
+        )
+        assertTrue(out.contains("Llama 3.2 running offline in Airux Pocket AI"))
+    }
+
+    @Test
+    fun simpleMathDivisionAndEdgeCases() {
+        assertEquals(4, UserMessageAugmenter.simpleMathAnswer("8 / 2"))
+        assertEquals(null, UserMessageAugmenter.simpleMathAnswer("8 / 3"))
+        assertEquals(null, UserMessageAugmenter.simpleMathAnswer("hello"))
+        assertEquals(null, UserMessageAugmenter.simpleMathAnswer("1000000 * 1000000"))
+    }
+
+    @Test
+    fun unmatchedCatalogReturnsMessageUnchanged() {
+        val msg = "Just chat"
+        assertEquals(msg, UserMessageAugmenter.augment("unknown", isUncensored = false, message = msg))
+    }
 }

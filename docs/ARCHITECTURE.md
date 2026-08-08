@@ -35,6 +35,9 @@ Per-model prompts in `PromptProfile.kt`. Benchmarks in `scripts/prompt-benchmark
 
 ## Testing
 
-- `./gradlew test` — catalog, prompts, capabilities
-- On-device benchmark — Settings → includes vision `count15` fixture with real pixels
-- Python benchmarks — against local GGUF weights (maintainer / optional CI smoke)
+See [docs/TESTING.md](TESTING.md) for the full layered strategy.
+
+- `./gradlew test` — JVM + Robolectric unit tests; feeds the Codecov badge.
+- `./gradlew connectedAndroidTest` — emulator tests for Compose UI and native glue.
+- On-device benchmark — Settings → includes vision `count15` fixture with real pixels.
+- Python benchmarks — against local GGUF weights (maintainer / optional CI smoke).

@@ -274,7 +274,8 @@ object CrashReporter {
         if (!::appContext.isInitialized) return
         runCatching {
             val file = newLogFile("checkpoint")
-            file.writeText(
+            writeAndSync(
+                file,
                 buildString {
                     appendLine("=== Airux Pocket AI Bench Checkpoint ===")
                     appendLine("time: ${timestamp()}")
@@ -284,7 +285,6 @@ object CrashReporter {
                     appendLine(body.trim())
                 },
             )
-            FileOutputStream(file, false).use { it.fd.sync() }
             trimOldLogs()
             breadcrumbSync("bench checkpoint saved ${file.name}")
         }
@@ -314,8 +314,7 @@ object CrashReporter {
         val report = buildReportText(kind, throwable, context)
         runCatching {
             val file = newLogFile("report")
-            file.writeText(report)
-            FileOutputStream(file, false).use { it.fd.sync() }
+            writeAndSync(file, report)
             trimOldLogs()
             if (showOnNextLaunch) {
                 appContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
@@ -329,8 +328,7 @@ object CrashReporter {
         val text = buildKillSuspectReport(lastStep) ?: return
         runCatching {
             val file = newLogFile("kill")
-            file.writeText(text)
-            FileOutputStream(file, false).use { it.fd.sync() }
+            writeAndSync(file, text)
             trimOldLogs()
             Log.e(TAG, "PROCESS_KILL report written: $lastStep")
         }
@@ -407,6 +405,14 @@ object CrashReporter {
         if (text.length <= MAX_TRAIL_FILE_CHARS) return
         runCatching {
             file.writeText(text.takeLast(MAX_TRAIL_FILE_CHARS))
+        }
+    }
+
+    /** Single open for write + fsync; reopening to sync would truncate the text away. */
+    private fun writeAndSync(file: File, text: String) {
+        FileOutputStream(file, /* append = */ false).use { out ->
+            out.write(text.toByteArray(Charsets.UTF_8))
+            out.fd.sync()
         }
     }
 

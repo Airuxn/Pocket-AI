@@ -1,9 +1,12 @@
+import org.gradle.testing.jacoco.plugins.JacocoTaskExtension
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
+    jacoco
 }
 
 android {
@@ -35,6 +38,7 @@ android {
     buildTypes {
         debug {
             // Lets CI / x86 emulators exercise startup (inference still arm64-only in jniLibs).
+            enableUnitTestCoverage = true
             ndk {
                 abiFilters += listOf("arm64-v8a", "x86_64")
             }
@@ -78,6 +82,15 @@ android {
     }
 }
 
+// Robolectric rewrites bytecode, so JaCoCo drops those classes unless no-location
+// classes are instrumented too. Without this, every Robolectric test reports 0%.
+tasks.withType<Test>().configureEach {
+    extensions.configure(JacocoTaskExtension::class.java) {
+        isIncludeNoLocationClasses = true
+        excludes = listOf("jdk.internal.*")
+    }
+}
+
 dependencies {
     implementation(project(":llama-bro-sdk"))
     implementation(libs.androidx.core.ktx)
@@ -99,6 +112,8 @@ dependencies {
 
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.robolectric:robolectric:4.14.1")
+    testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.test:runner:1.6.2")
 }
+

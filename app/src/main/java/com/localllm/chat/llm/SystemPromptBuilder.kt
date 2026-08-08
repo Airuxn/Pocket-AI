@@ -37,10 +37,11 @@ object SystemPromptBuilder {
             ModelIdentity("Mistral", "an open-source model by Mistral AI", "Mistral AI")
         lower.contains("deepseek") ->
             ModelIdentity("DeepSeek", "an open-source model by DeepSeek", "DeepSeek")
-        lower.contains("phi") ->
-            ModelIdentity("Phi", "an open-source model by Microsoft", "Microsoft")
+        // "dolphin" contains "phi", so it has to be matched first.
         lower.contains("dolphin") ->
             ModelIdentity("Dolphin", "a local open-source language model", "its creators")
+        lower.contains("phi") ->
+            ModelIdentity("Phi", "an open-source model by Microsoft", "Microsoft")
         else -> ModelIdentity(fallback, "a local open-source language model", "its creators")
     }
 

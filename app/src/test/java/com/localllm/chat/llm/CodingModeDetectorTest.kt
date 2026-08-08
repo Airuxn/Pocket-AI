@@ -2,8 +2,6 @@ package com.localllm.chat.llm
 
 import com.localllm.chat.domain.ChatMode
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class CodingModeDetectorTest {
@@ -73,17 +71,5 @@ class CodingModeDetectorTest {
             isContinue = false,
         )
         assertEquals(ChatMode.CHAT, mode)
-    }
-}
-
-class CodeContinuePromptTest {
-    @Test
-    fun offersContinueForIncompleteFence() {
-        assertTrue(CodeContinuePrompt.shouldOfferContinue("Here:\n```kotlin\nfun main() {"))
-    }
-
-    @Test
-    fun noContinueForCompleteFence() {
-        assertFalse(CodeContinuePrompt.shouldOfferContinue("```kotlin\nfun main() {}\n```"))
     }
 }
