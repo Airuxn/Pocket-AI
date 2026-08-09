@@ -2,7 +2,7 @@
 
 **Airux Pocket AI** on Android — on-device LLM chat for **arm64** phones. Private AI that runs locally via llama.cpp; optional web search uses DuckDuckGo when a model supports native tool calling.
 
-**Package:** `com.localllm.chat` · **Latest:** [v1.0.1](https://github.com/Airuxn/Pocket-AI/releases/latest) · **Project age:** ~1 month (first code July 2026, public release August 2026)
+**Package:** `com.localllm.chat` · **Latest:** [v1.0.1](https://github.com/Airuxn/Pocket-AI/releases/latest) · **Project age:** First code July 2026, public release August 2026
 
 [![CI](https://github.com/Airuxn/Pocket-AI/actions/workflows/ci.yml/badge.svg)](https://github.com/Airuxn/Pocket-AI/actions/workflows/ci.yml)
 [![codecov](https://img.shields.io/codecov/c/github/Airuxn/Pocket-AI)](https://codecov.io/gh/Airuxn/Pocket-AI)
