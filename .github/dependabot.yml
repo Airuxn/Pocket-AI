@@ -11,6 +11,10 @@ updates:
     groups:
       github-actions:
         patterns: ["*"]
+    # codecov-action@v7 processes Android/JaCoCo uploads as 0% coverage
+    ignore:
+      - dependency-name: codecov/codecov-action
+        update-types: ["version-update:semver-major"]
     labels:
       - dependencies
       - github-actions
