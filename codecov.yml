@@ -1,8 +1,5 @@
 codecov:
-  # Broken uploads since fe58f51 left ci_passed=null; don't block processing.
-  require_ci_to_pass: false
-  notify:
-    wait_for_ci: false
+  require_ci_to_pass: true
 
 coverage:
   status:
