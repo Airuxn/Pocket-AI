@@ -52,7 +52,7 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: app/build/reports/coverage/test/debug/report.xml
-          fail_ci_if_error: false
+          fail_ci_if_error: true
           verbose: true
 
       - name: Lint app and SDK module
