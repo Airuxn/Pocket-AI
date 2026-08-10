@@ -1,5 +1,6 @@
 codecov:
   require_ci_to_pass: true
+  disable_default_path_fixes: true
 
 coverage:
   status:
@@ -53,7 +54,7 @@ coverage:
 # 4. Keep the Python prompt-benchmark suite as the pre-release gate for tool
 #    behavior; it already validates XML tool-call reliability on real weights.
 ignore:
-  - "app/src/main/java/com/localllm/chat/ui/**"
+  - "app/src/main/java/com/localllm/chat/ui/"
   - "app/src/main/java/com/localllm/chat/MainActivity.kt"
   - "app/src/main/java/com/localllm/chat/PocketAiApp.kt"
   - "app/src/main/java/com/localllm/chat/onboarding/PasswordGate.kt"

@@ -19,8 +19,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - uses: actions/setup-java@v5
         with:
@@ -52,7 +50,10 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: app/build/reports/coverage/test/debug/report.xml
-          fail_ci_if_error: false
+          report_type: cobertura
+          use_legacy_upload_endpoint: true
+          disable_file_fixes: true
+          fail_ci_if_error: true
           verbose: true
 
       - name: Lint app and SDK module
