@@ -6,7 +6,7 @@
 
 [![CI](https://github.com/Airuxn/Pocket-AI/actions/workflows/ci.yml/badge.svg)](https://github.com/Airuxn/Pocket-AI/actions/workflows/ci.yml)
 [![codecov](https://img.shields.io/codecov/c/github/Airuxn/Pocket-AI)](https://codecov.io/gh/Airuxn/Pocket-AI)
-[![License](https://img.shields.io/github/license/Airuxn/Pocket-AI)](LICENSE)
+[![License](https://img.shields.io/github/license/Airuxn/Pocket-AI?v=2)](LICENSE)
 
 **Quality:** CI (unit tests + JaCoCo coverage, lint, debug build) · CodeQL · Dependabot · manual [Release workflow](.github/workflows/release.yml) for APK · Vercel `ignoreCommand` waits for CI + CodeQL if hosted on Vercel
 
