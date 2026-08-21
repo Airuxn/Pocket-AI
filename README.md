@@ -1,4 +1,4 @@
-# Pocket AI
+# Pocket AI 
 
 **Airux Pocket AI** on Android — on-device LLM chat for **arm64** phones. Private AI that runs locally via llama.cpp; optional web search uses DuckDuckGo when a model supports native tool calling.
 
