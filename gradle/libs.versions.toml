@@ -1,15 +1,15 @@
 [versions]
 agp = "8.7.3"
-kotlin = "2.0.21"
-coreKtx = "1.15.0"
+kotlin = "2.4.10"
+coreKtx = "1.19.0"
 lifecycle = "2.8.7"
-activityCompose = "1.9.3"
+activityCompose = "1.13.0"
 composeBom = "2024.12.01"
 navigation = "2.8.5"
-room = "2.6.1"
+room = "2.8.4"
 datastore = "1.1.1"
-coroutines = "1.9.0"
-serialization = "1.7.3"
+coroutines = "1.11.0"
+serialization = "1.11.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -36,4 +36,4 @@ android-library = { id = "com.android.library", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
-ksp = { id = "com.google.devtools.ksp", version = "2.0.21-1.0.28" }
+ksp = { id = "com.google.devtools.ksp", version = "2.3.11" }
