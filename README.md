@@ -36,9 +36,6 @@ Models download in-app from Hugging Face. Tier picks the best fit for your phone
 | SmolVLM2 500M Video | Vision | ~545 MB total | 4 GB | — |
 | SmolVLM2 2.2B | Vision | ~1.6 GB total | 6 GB | — |
 | Gemma 3 4B Vision | Vision | ~3.3 GB total | 8 GB | — |
-| Dolphin 3.0 1B | Uncensored | ~810 MB | 4 GB | — |
-| Dolphin 3.0 1.5B | Uncensored | ~940 MB | 6 GB | — |
-| Dolphin 3.0 3B | Uncensored | ~1.9 GB | 8 GB | — |
 
 Catalog source: [`models.json`](models.json). Capabilities and tool wiring: [`app/src/main/assets/capabilities.json`](app/src/main/assets/capabilities.json).
 
