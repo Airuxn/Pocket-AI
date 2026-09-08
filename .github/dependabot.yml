@@ -29,9 +29,6 @@ updates:
         update-types:
           - minor
           - patch
-    ignore:
-      - dependency-name: com.android.tools.build:gradle
-        update-types: ["version-update:semver-major"]
     labels:
       - dependencies
       - gradle
