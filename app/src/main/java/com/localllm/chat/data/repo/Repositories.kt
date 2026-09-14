@@ -270,7 +270,11 @@ class ModelRepository(
             .toSet()
         var changed = false
         dir.listFiles()?.filter { it.isFile && it.name.startsWith("mmproj-") }?.forEach { file ->
-            if (file.name !in keep && file.delete()) changed = true
+            if (file.name !in keep) {
+                file.delete()
+                // Count as changed once the orphan is gone, even if another sync already deleted it.
+                if (!file.exists()) changed = true
+            }
         }
         return changed
     }
